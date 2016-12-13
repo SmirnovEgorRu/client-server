@@ -1,4 +1,4 @@
-#include < iostream >
+пїњ#include < iostream >
 #pragma comment( lib, "ws2_32.lib" )
 
 #include < Windows.h >
@@ -13,7 +13,7 @@ int nclients = 0;
 #define PRINTNUSERS if (nclients)\
   printf("%d user on-line\n\n",nclients);\
   else printf("No User on line\n\n");
-#define MY_PORT 777
+#define MY_PORT 65000
 
 matrix get_matrix(SOCKET& my_sock);
 void send_matrix(SOCKET& my_sock, matrix& mtrx);
@@ -33,7 +33,6 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	// создание сокета
 	SOCKET mysocket;
 	if ((mysocket = socket(AF_INET, SOCK_STREAM, 0))<0)
 	{
@@ -42,12 +41,10 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	//св€зывание сокета с локальным адресом
 	sockaddr_in local_addr;
 	local_addr.sin_family = AF_INET;
 	local_addr.sin_port = htons(MY_PORT);
 	local_addr.sin_addr.s_addr = 0;
-	// вызываем bind дл€ св€зывани€
 	if (bind(mysocket, (sockaddr *)&local_addr, sizeof(local_addr))) {
 		printf("Error bind %d\n", WSAGetLastError());
 		closesocket(mysocket);
@@ -55,7 +52,6 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	// ожидание подключений
 	if (listen(mysocket, 20))
 	{
 		printf("Error listen %d\n", WSAGetLastError());
@@ -66,9 +62,8 @@ int main(int argc, char* argv[])
 
 	printf("Waiting for connection\n");
 
-	// извлекаем сообщение из очереди
-	SOCKET client_socket;    // сокет дл€ клиента
-	sockaddr_in client_addr;    // адрес клиента
+	SOCKET client_socket;
+	sockaddr_in client_addr;
 
 	int client_addr_size = sizeof(client_addr);
 
@@ -144,15 +139,14 @@ matrix get_matrix(SOCKET& my_sock) {
 		else if (flag) {
 			char* ch = &buff[0];
 			for (int i = 0; i < bytes_recv - 1; i += sizeof(int)) {
+				if (index_i >= n) break;
 				int* number = (int*)ch;
 
 				v[index_i][index_j++] = *number;
 				if (index_j >= m) { ++index_i; index_j = 0; }
 				ch += sizeof(int);
 			}
-			if (index_i >= n) { 
-				break;
-			}
+			if (index_i >= n) break;
 		}
 	}
 
@@ -181,7 +175,7 @@ void send_matrix(SOCKET& my_sock, matrix& mtrx) {
 	size[sizeof(int) * 2 + 1] = '\0';
 
 
-	recv(my_sock, &buff[0], sizeof(buff) - 1, 0);
+	//recv(my_sock, &buff[0], sizeof(buff) - 1, 0);
 	send(my_sock, &size[0], 2 * sizeof(int) + 2, 0);
 
 	int size_buffer = 0;
@@ -217,5 +211,3 @@ void send_matrix(SOCKET& my_sock, matrix& mtrx) {
 
 	std::cout << "result matrix was sent" << std::endl << std::endl;
 }
-
-
